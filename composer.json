@@ -1,0 +1,29 @@
+{
+    "name": "somnambulist/cte-builder",
+    "type": "library",
+    "description": "Library for programmatically making CTE SQL queries (WITH queries)",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.2",
+        "ext-json":  "*",
+        "beberlei/assert": "~3.2",
+        "doctrine/dbal": "~2.9",
+        "somnambulist/collection": "~3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~8.2",
+        "somnambulist/domain": "~2.0",
+        "symfony/var-dumper": "^4.3",
+        "vimeo/psalm": "^3.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Somnambulist\\CTEBuilder\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Somnambulist\\CTEBuilder\\Tests\\": "tests/"
+        }
+    }
+}
