@@ -1,5 +1,7 @@
 # Common Table Expression Builder
 
+[![GitHub Actions Build Status](https://github.com/somnambulist-tech/cte-builder/workflows/tests/badge.svg)](https://github.com/somnambulist-tech/cte-builder/actions?query=workflow%3Atests)
+
 Provides a programmatic interface via Doctrine DBAL Query Builder for creating Common
 Table Expressions (WITH clauses). Includes support for CTE dependencies and debugging.
 A CTE allows extracting a sub-select or derived query that can be executed separately
