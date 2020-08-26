@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Somnambulist\CTEBuilder;
 
@@ -58,28 +56,10 @@ class Expression
 
     use CanPassThroughToQuery;
 
-    /**
-     * @var string
-     */
-    private $alias;
+    private QueryBuilder $query;
+    private string $alias;
+    private array $dependencies = [];
 
-    /**
-     * @var QueryBuilder
-     */
-    private $query;
-
-    /**
-     * @var array
-     */
-    private $dependencies = [];
-
-    /**
-     * Constructor.
-     *
-     * @param string       $alias
-     * @param QueryBuilder $query
-     * @param array        $dependencies
-     */
     public function __construct(string $alias, QueryBuilder $query, array $dependencies = [])
     {
         $this->alias        = $alias;

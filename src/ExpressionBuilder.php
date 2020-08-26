@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Somnambulist\CTEBuilder;
 
@@ -60,44 +58,19 @@ class ExpressionBuilder
 
     use CanPassThroughToQuery;
 
-    /**
-     * @var Connection
-     */
-    private $conn;
+    private Connection $conn;
+    private QueryBuilder $query;
+    private Collection $expressions;
+    private Collection $parameters;
+    private ?LoggerInterface $logger;
 
-    /**
-     * @var LoggerInterface|null
-     */
-    private $logger;
-
-    /**
-     * @var QueryBuilder
-     */
-    private $query;
-
-    /**
-     * @var Collection
-     */
-    private $parameters;
-
-    /**
-     * @var Collection
-     */
-    private $expressions;
-
-    /**
-     * Constructor.
-     *
-     * @param Connection      $conn
-     * @param LoggerInterface $logger
-     */
     public function __construct(Connection $conn, LoggerInterface $logger = null)
     {
         $this->conn        = $conn;
         $this->logger      = $logger;
         $this->query       = $conn->createQueryBuilder();
-        $this->parameters  = new Collection();
         $this->expressions = new Collection();
+        $this->parameters  = new Collection();
     }
 
     public function __toString()
@@ -119,11 +92,6 @@ class ExpressionBuilder
         return $this->expressions;
     }
 
-    /**
-     * Clears all CTEs, parameters and the base query instance
-     *
-     * @return void
-     */
     public function clear(): void
     {
         $this->query       = $this->conn->createQueryBuilder();
@@ -143,6 +111,8 @@ class ExpressionBuilder
 
     /**
      * Create a new CTE Expression with optionally required dependencies
+     *
+     * These dependencies are permanent and cannot be removed from the expression.
      *
      * @param string $alias
      * @param string ...$dependsOn A number of fixed dependent WITH expressions

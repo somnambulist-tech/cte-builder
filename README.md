@@ -17,7 +17,7 @@ Be sure to read up on CTEs and WITH clauses for your chosen database server.
 
 ## Requirements
 
- * PHP 7.2+
+ * PHP 7.4+
  * doctrine/dbal
  * somnambulist/collection
 
