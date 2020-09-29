@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Somnambulist\CTEBuilder\Exceptions;
+namespace Somnambulist\Components\CTEBuilder\Exceptions;
 
 use Assert\Assertion;
 use Assert\InvalidArgumentException;
@@ -8,8 +8,8 @@ use Assert\InvalidArgumentException;
 /**
  * Class ExpressionAlreadyExistsException
  *
- * @package    Somnambulist\CTEBuilder\Exceptions
- * @subpackage Somnambulist\CTEBuilder\Exceptions\ExpressionAlreadyExistsException
+ * @package    Somnambulist\Components\CTEBuilder\Exceptions
+ * @subpackage Somnambulist\Components\CTEBuilder\Exceptions\ExpressionAlreadyExistsException
  */
 class ExpressionAlreadyExistsException extends InvalidArgumentException
 {

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Somnambulist\CTEBuilder\Behaviours;
+namespace Somnambulist\Components\CTEBuilder\Behaviours;
 
 use BadMethodCallException;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
@@ -14,8 +14,8 @@ use function sprintf;
  *
  * Allow passing through certain methods to an underlying QueryBuilder instance.
  *
- * @package    Somnambulist\CTEBuilder\Behaviours
- * @subpackage Somnambulist\CTEBuilder\Behaviours\CanPassThroughToQuery
+ * @package    Somnambulist\Components\CTEBuilder\Behaviours
+ * @subpackage Somnambulist\Components\CTEBuilder\Behaviours\CanPassThroughToQuery
  *
  * @property QueryBuilder $query
  */

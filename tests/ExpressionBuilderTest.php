@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Somnambulist\CTEBuilder\Tests;
+namespace Somnambulist\Components\CTEBuilder\Tests;
 
-use OutOfBoundsException;
-use Somnambulist\CTEBuilder\Expression;
-use Somnambulist\CTEBuilder\ExpressionBuilder;
-use Somnambulist\CTEBuilder\Exceptions\ExpressionAlreadyExistsException;
-use Somnambulist\CTEBuilder\Exceptions\ExpressionNotFoundException;
-use Somnambulist\CTEBuilder\Exceptions\UnresolvableDependencyException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
+use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionAlreadyExistsException;
+use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionNotFoundException;
+use Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyException;
+use Somnambulist\Components\CTEBuilder\Expression;
+use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
 use Somnambulist\Domain\Entities\Types\DateTime\DateTime;
 use Somnambulist\Domain\Utils\EntityAccessor;
 
 /**
  * Class ExpressionBuilderTest
  *
- * @package    Somnambulist\CTEBuilder\Tests
- * @subpackage Somnambulist\CTEBuilder\Tests\ExpressionBuilderTest
+ * @package    Somnambulist\Components\CTEBuilder\Tests
+ * @subpackage Somnambulist\Components\CTEBuilder\Tests\ExpressionBuilderTest
  */
 class ExpressionBuilderTest extends TestCase
 {

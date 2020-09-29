@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace Somnambulist\CTEBuilder\Exceptions;
+namespace Somnambulist\Components\CTEBuilder\Exceptions;
 
 use RuntimeException;
 
 /**
  * Class UnresolvableDependencyException
  *
- * @package    Somnambulist\CTEBuilder\Exceptions
- * @subpackage Somnambulist\CTEBuilder\Exceptions\UnresolvableDependencyException
+ * @package    Somnambulist\Components\CTEBuilder\Exceptions
+ * @subpackage Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyException
  */
 class UnresolvableDependencyException extends RuntimeException
 {

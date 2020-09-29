@@ -1,19 +1,19 @@
 <?php declare(strict_types=1);
 
-namespace Somnambulist\CTEBuilder;
+namespace Somnambulist\Components\CTEBuilder;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Query\Expression\ExpressionBuilder as DBALExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 use OutOfBoundsException;
 use Psr\Log\LoggerInterface;
 use Somnambulist\Collection\MutableCollection as Collection;
-use Somnambulist\CTEBuilder\Behaviours\CanPassThroughToQuery;
-use Somnambulist\CTEBuilder\Exceptions\ExpressionAlreadyExistsException;
-use Somnambulist\CTEBuilder\Exceptions\ExpressionNotFoundException;
-use Somnambulist\CTEBuilder\Exceptions\UnresolvableDependencyException;
+use Somnambulist\Components\CTEBuilder\Behaviours\CanPassThroughToQuery;
+use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionAlreadyExistsException;
+use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionNotFoundException;
+use Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyException;
 
 /**
  * Class ExpressionBuilder
@@ -25,8 +25,8 @@ use Somnambulist\CTEBuilder\Exceptions\UnresolvableDependencyException;
  * method pass-through to the underlying primary query builder and any bound CTE can be
  * accessed using property accessors.
  *
- * @package    Somnambulist\CTEBuilder
- * @subpackage Somnambulist\CTEBuilder\ExpressionBuilder
+ * @package    Somnambulist\Components\CTEBuilder
+ * @subpackage Somnambulist\Components\CTEBuilder\ExpressionBuilder
  *
  * @method Expression addGroupBy(string $groupBy)
  * @method Expression addOrderBy(string $sort, string $order = null)
@@ -51,7 +51,7 @@ use Somnambulist\CTEBuilder\Exceptions\UnresolvableDependencyException;
  * @method Expression setParameter(string|int $key, mixed $value, $type = null)
  * @method Expression setParameters(array $parameters)
  * @method Expression where($where)
- * @method \Doctrine\DBAL\Query\Expression\ExpressionBuilder expr()
+ * @method DBALExpressionBuilder expr()
  */
 class ExpressionBuilder
 {
@@ -179,10 +179,6 @@ class ExpressionBuilder
         });
     }
 
-    /**
-     * @return Statement
-     * @throws DBALException
-     */
     public function execute(): Statement
     {
         $this->log();
@@ -218,10 +214,6 @@ class ExpressionBuilder
 
     /**
      * @link https://stackoverflow.com/questions/39711720/php-order-array-based-on-elements-dependency
-     *
-     * @param Collection $ctes A collection of Expression objects
-     *
-     * @return Collection
      */
     private function buildDependencyTree(Collection $ctes): Collection
     {
@@ -291,7 +283,7 @@ class ExpressionBuilder
      * @internal
      * @codeCoverageIgnore
      */
-    private function expandQueryWithParameterSubstitution($query, Collection $parameters)
+    private function expandQueryWithParameterSubstitution(string $query, Collection $parameters)
     {
         $debug = $parameters->map(function ($value) {
             return is_numeric($value) ? $value : $this->conn->quote((string)$value);

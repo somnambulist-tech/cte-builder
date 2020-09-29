@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Somnambulist\CTEBuilder\Tests;
+namespace Somnambulist\Components\CTEBuilder\Tests;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDOSqlite\Driver;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
-use Somnambulist\CTEBuilder\Expression;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 use Somnambulist\Collection\MutableCollection as Collection;
+use Somnambulist\Components\CTEBuilder\Expression;
 
 /**
  * Class ExpressionTest
  *
- * @package    Somnambulist\CTEBuilder\Tests
- * @subpackage Somnambulist\CTEBuilder\Tests\ExpressionTest
+ * @package    Somnambulist\Components\CTEBuilder\Tests
+ * @subpackage Somnambulist\Components\CTEBuilder\Tests\ExpressionTest
  */
 class ExpressionTest extends TestCase
 {

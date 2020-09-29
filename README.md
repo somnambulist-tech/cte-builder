@@ -37,6 +37,9 @@ either directly and bound to the builder, or via the builder. The builder requir
 If using Symfony the default configured connection can be used.
 
 ```php
+<?php
+use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
+
 $eb = new ExpressionBuilder($connection);
 $expr = $eb->createExpression('first_clause');
 
@@ -51,6 +54,9 @@ constants for the aliases to make it easier to keep them in-sync. When referenci
 CTEs it is important to then set that as an explicit dependency of the CTE:
 
 ```php
+<?php
+use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
+
 $eb = new ExpressionBuilder($connection);
 $expr1 = $eb->createExpression('first_clause');
 $expr1->from('second_clause');
@@ -65,6 +71,9 @@ they are referenced - they cannot be back-referenced; hence the need to set the 
 Alternatively, specify the dependencies when creating the expression:
 
 ```php
+<?php
+use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
+
 $eb = new ExpressionBuilder($connection);
 $expr1 = $eb->createExpression('first_clause', 'second_clause');
 $expr1->from('second_clause');
@@ -85,6 +94,9 @@ Once defined a CTE can be accessed from the ExpressionBuilder either via the `ge
 or via a dynamic property accessor:
 
 ```php
+<?php
+use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
+
 $eb = new ExpressionBuilder($connection);
 $eb->createExpression('first_clause');
 $eb->createExpression('second_clause');
@@ -111,4 +123,4 @@ logger instance that can report to your frameworks profiler.
 
 ## Test Suite
 
-Run the test suite via: vendor/bin/phpunit.
+Run the test suite via: `vendor/bin/phpunit`.

@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Somnambulist\CTEBuilder;
+namespace Somnambulist\Components\CTEBuilder;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Somnambulist\Collection\MutableCollection as Collection;
-use Somnambulist\CTEBuilder\Behaviours\CanPassThroughToQuery;
+use Somnambulist\Components\CTEBuilder\Behaviours\CanPassThroughToQuery;
 
 /**
  * Class Expression
@@ -23,8 +23,8 @@ use Somnambulist\CTEBuilder\Behaviours\CanPassThroughToQuery;
  * parameters must be bound using named place-holders and not positional place-holders.
  * All parameters will be collected into a single parameters Collection at build time.
  *
- * @package    Somnambulist\CTEBuilder
- * @subpackage Somnambulist\CTEBuilder\Expression
+ * @package    Somnambulist\Components\CTEBuilder
+ * @subpackage Somnambulist\Components\CTEBuilder\Expression
  *
  * @method Expression addGroupBy(string $groupBy)
  * @method Expression addOrderBy(string $sort, string $order = null)
@@ -58,7 +58,7 @@ class Expression
 
     private QueryBuilder $query;
     private string $alias;
-    private array $dependencies = [];
+    private array $dependencies;
 
     public function __construct(string $alias, QueryBuilder $query, array $dependencies = [])
     {
