@@ -13,8 +13,8 @@ use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionNotFoundException;
 use Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyException;
 use Somnambulist\Components\CTEBuilder\Expression;
 use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
-use Somnambulist\Domain\Entities\Types\DateTime\DateTime;
-use Somnambulist\Domain\Utils\EntityAccessor;
+use Somnambulist\Components\Domain\Entities\Types\DateTime\DateTime;
+use Somnambulist\Components\Domain\Utils\EntityAccessor;
 
 /**
  * Class ExpressionBuilderTest

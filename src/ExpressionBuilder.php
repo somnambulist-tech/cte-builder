@@ -9,7 +9,7 @@ use Doctrine\DBAL\Query\Expression\ExpressionBuilder as DBALExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 use OutOfBoundsException;
 use Psr\Log\LoggerInterface;
-use Somnambulist\Collection\MutableCollection as Collection;
+use Somnambulist\Components\Collection\MutableCollection as Collection;
 use Somnambulist\Components\CTEBuilder\Behaviours\CanPassThroughToQuery;
 use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionAlreadyExistsException;
 use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionNotFoundException;

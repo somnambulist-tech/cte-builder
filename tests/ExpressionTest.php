@@ -9,7 +9,7 @@ use Doctrine\DBAL\Driver\PDOSqlite\Driver;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PHPUnit\Framework\TestCase;
-use Somnambulist\Collection\MutableCollection as Collection;
+use Somnambulist\Components\Collection\MutableCollection as Collection;
 use Somnambulist\Components\CTEBuilder\Expression;
 
 /**
