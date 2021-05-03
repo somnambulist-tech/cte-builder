@@ -174,9 +174,7 @@ class ExpressionBuilder
     {
         $this->parameters->merge($this->query->getParameters());
 
-        $this->expressions->each(function (Expression $cte) {
-            $this->parameters->merge($cte->getParameters());
-        });
+        $this->expressions->each(fn (Expression $cte) => $this->parameters->merge($cte->getParameters()));
     }
 
     public function execute(): Statement
@@ -185,9 +183,10 @@ class ExpressionBuilder
 
         $stmt = $this->conn->prepare($this->getSQL());
 
-        $this->getParameters()->each(function ($value, $key) use ($stmt) {
-            $stmt->bindValue($key, $value, (is_int($value) ? ParameterType::INTEGER : ParameterType::STRING));
-        });
+        $this
+            ->getParameters()
+            ->each(fn ($value, $key) => $stmt->bindValue($key, $value, (is_int($value) ? ParameterType::INTEGER : ParameterType::STRING)))
+        ;
 
         $stmt->execute();
 
@@ -203,9 +202,7 @@ class ExpressionBuilder
     {
         $with = $this
             ->buildDependencyTree($this->expressions)
-            ->map(function (Expression $cte, string $key) {
-                return sprintf('%s AS (%s)', $cte->getAlias(), $cte->getSQL());
-            })
+            ->map(fn (Expression $cte, string $key) => sprintf('%s AS (%s)', $cte->getAlias(), $cte->getSQL()))
             ->implode(', ')
         ;
 
@@ -262,7 +259,7 @@ class ExpressionBuilder
      *
      * @codeCoverageIgnore
      */
-    private function log()
+    private function log(): void
     {
         if (!$this->logger) {
             return;
@@ -283,7 +280,7 @@ class ExpressionBuilder
      * @internal
      * @codeCoverageIgnore
      */
-    private function expandQueryWithParameterSubstitution(string $query, Collection $parameters)
+    private function expandQueryWithParameterSubstitution(string $query, Collection $parameters): string
     {
         $debug = $parameters->map(function ($value) {
             return is_numeric($value) ? $value : $this->conn->quote((string)$value);

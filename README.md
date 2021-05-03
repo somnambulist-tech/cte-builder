@@ -1,6 +1,10 @@
 # Common Table Expression Builder
 
-[![GitHub Actions Build Status](https://github.com/somnambulist-tech/cte-builder/workflows/tests/badge.svg)](https://github.com/somnambulist-tech/cte-builder/actions?query=workflow%3Atests)
+[![GitHub Actions Build Status](https://img.shields.io/github/workflow/status/somnambulist-tech/cte-builder/tests?logo=github)](https://github.com/somnambulist-tech/cte-builder/actions?query=workflow%3Atests)
+[![Issues](https://img.shields.io/github/issues/somnambulist-tech/cte-builder?logo=github)](https://github.com/somnambulist-tech/cte-builder/issues)
+[![License](https://img.shields.io/github/license/somnambulist-tech/cte-builder?logo=github)](https://github.com/somnambulist-tech/cte-builder/blob/master/LICENSE)
+[![PHP Version](https://img.shields.io/packagist/php-v/somnambulist/cte-builder?logo=php&logoColor=white)](https://packagist.org/packages/somnambulist/cte-builder)
+[![Current Version](https://img.shields.io/packagist/v/somnambulist/cte-builder?logo=packagist&logoColor=white)](https://packagist.org/packages/somnambulist/cte-builder)
 
 Provides a programmatic interface via Doctrine DBAL Query Builder for creating Common
 Table Expressions (WITH clauses). Includes support for CTE dependencies and debugging.

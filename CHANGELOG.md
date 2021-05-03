@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+2021-02-06
+----------
+
+ * Minor code tweaks; add missing return types
+
 2021-01-20
 ----------
 
