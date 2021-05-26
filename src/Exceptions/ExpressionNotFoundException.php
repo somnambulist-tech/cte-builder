@@ -16,7 +16,7 @@ class ExpressionNotFoundException extends InvalidArgumentException
 
     public static function aliasNotFound(string $alias): self
     {
-        return new static(
+        return new self(
             sprintf('CTE with alias "%s" could not be found', $alias),
             Assertion::INVALID_KEY_EXISTS,
             'commonTableExpressions',

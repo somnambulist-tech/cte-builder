@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+2021-05-25
+----------
+
+ * Add support for recursive expressions
+ * Add support for explicit return fields in CTE definition
+
 2021-02-06
 ----------
 

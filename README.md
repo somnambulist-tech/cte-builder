@@ -109,6 +109,36 @@ $eb->createExpression('third_clause');
 $eb->third_clause->select();
 ```
 
+### Recursive CTEs
+
+To create a recursive CTE, first create the builder as before and then use `createRecursiveExpression`.
+This will return a `RecursiveExpression` instance. It is largely the same as the standard `Expression`
+except it provides the additional methods:
+
+ * `withInitialSelect`
+ * `withUniqueRows`
+
+`withInitialSelect` is used to initialise the carry that is used in the following recursive call. This
+can be simple value e.g.: `VALUES(1)` or `SELECT 1` or a more complex query / query builder instance.
+If using a query builder instance any parameters __MUST__ be named parameters. The parameters will be
+merged into the CTE and the SQL cast to a string.
+
+`withUniqueRows` (default false) if set to `true` will change the UNION ALL to a UNION.
+
+Finally: the standard `query()` is for setting up the recursive query itself i.e: the right side of
+the UNION.
+
+Recursive expressions support the same dependencies and calls as Expressions (they inherit all methods).
+
+__Note:__ if your main query requires further `UNION` statements, then you will need to force the
+query into the SELECT clause as the underlying DBAL QueryBuilder does not support UNION queries.
+
+__Note:__ as the initial select clause could have no column names, you must specify the names of the
+fields that will be returned by calling: `withFields()` and then supplying a list of fields.
+
+See the test cases for some examples of simple queries and then a more complex case adapted from the
+SQlite documentation.
+
 ## Profiling
 
 If you use Symfony; using the standard Doctrine DBAL connection from your entity manager will

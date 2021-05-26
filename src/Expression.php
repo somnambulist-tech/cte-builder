@@ -7,6 +7,9 @@ use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Somnambulist\Components\Collection\MutableCollection as Collection;
 use Somnambulist\Components\CTEBuilder\Behaviours\CanPassThroughToQuery;
+use function array_merge;
+use function implode;
+use function sprintf;
 
 /**
  * Class Expression
@@ -59,6 +62,7 @@ class Expression
     private QueryBuilder $query;
     private string $alias;
     private array $dependencies;
+    private array $fields = [];
 
     public function __construct(string $alias, QueryBuilder $query, array $dependencies = [])
     {
@@ -87,6 +91,16 @@ class Expression
         return $this->query->getSQL();
     }
 
+    public function getInlineSQL(): string
+    {
+        $fields = '';
+        if (!empty($this->getFields())) {
+            $fields = sprintf(' (%s)', implode(', ', $this->getFields()));
+        }
+
+        return sprintf('%s%s AS (%s)', $this->getAlias(), $fields, $this->getSQL());
+    }
+
     public function getParameters(): Collection
     {
         return new Collection($this->query->getParameters());
@@ -97,9 +111,33 @@ class Expression
         return $this->dependencies;
     }
 
+    public function getFields(): array
+    {
+        return $this->fields;
+    }
+
+    public function mergeParameters(array $parameters): void
+    {
+        $this->setParameters(array_merge($this->query->getParameters(), $parameters));
+    }
+
     public function dependsOn(string ...$dependency): self
     {
         $this->dependencies = array_merge($this->dependencies, $dependency);
+
+        return $this;
+    }
+
+    /**
+     * Specify the fields that will be returned from this CTE
+     *
+     * @param string ...$fields
+     *
+     * @return $this
+     */
+    public function withFields(string ...$fields): self
+    {
+        $this->fields = $fields;
 
         return $this;
     }

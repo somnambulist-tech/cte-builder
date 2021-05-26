@@ -110,7 +110,7 @@ class ExpressionBuilder
     }
 
     /**
-     * Create a new CTE Expression with optionally required dependencies
+     * Create a new CTE Expression with optional required dependencies
      *
      * These dependencies are permanent and cannot be removed from the expression.
      *
@@ -126,6 +126,27 @@ class ExpressionBuilder
         }
 
         return $this->with(new Expression($alias, $this->conn->createQueryBuilder(), $dependsOn))->get($alias);
+    }
+
+    /**
+     * Create a new recursive Expression with optional required dependencies
+     *
+     * These dependencies are permanent and cannot be removed from the expression.
+     *
+     * @param string $alias
+     * @param string ...$dependsOn A number of fixed dependent WITH expressions
+     *
+     * @return RecursiveExpression
+     */
+    public function createRecursiveExpression(string $alias, string ...$dependsOn): RecursiveExpression
+    {
+        if ($this->has($alias)) {
+            throw ExpressionAlreadyExistsException::aliasExists($alias);
+        }
+
+        $this->with($cte = new RecursiveExpression($alias, $this->conn->createQueryBuilder(), $dependsOn));
+
+        return $cte;
     }
 
     public function with(Expression $cte): self
@@ -198,15 +219,20 @@ class ExpressionBuilder
         return trim(sprintf('%s %s', $this->buildWith(), $this->query->getSQL()));
     }
 
+    private function isRecursive(): bool
+    {
+        return $this->expressions->filter(fn (Expression $e) => $e instanceof RecursiveExpression)->count() > 0;
+    }
+
     private function buildWith(): string
     {
         $with = $this
             ->buildDependencyTree($this->expressions)
-            ->map(fn (Expression $cte, string $key) => sprintf('%s AS (%s)', $cte->getAlias(), $cte->getSQL()))
+            ->map(fn (Expression $cte, string $key) => $cte->getInlineSQL())
             ->implode(', ')
         ;
 
-        return $with ? 'WITH ' . $with : '';
+        return $with ? sprintf('WITH%s %s', $this->isRecursive() ? ' RECURSIVE' : '', $with) : '';
     }
 
     /**

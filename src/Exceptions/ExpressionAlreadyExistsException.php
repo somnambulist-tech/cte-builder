@@ -16,7 +16,7 @@ class ExpressionAlreadyExistsException extends InvalidArgumentException
 
     public static function aliasExists(string $alias): self
     {
-        return new static(
+        return new self(
             sprintf('CTE with alias "%s" already exists in the query builder', $alias),
             Assertion::INVALID_KEY_EXISTS,
             'commonTableExpressions',

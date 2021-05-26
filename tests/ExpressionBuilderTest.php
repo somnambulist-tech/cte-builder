@@ -352,4 +352,149 @@ class ExpressionBuilderTest extends TestCase
 
         $qb->table;
     }
+
+    public function testCanBuildRecursiveCTEs()
+    {
+        $conn = $this->createMock(Connection::class);
+        $conn
+            ->expects($this->any())
+            ->method('createQueryBuilder')
+            ->will($this->returnCallback(function () use ($conn) {
+                return new QueryBuilder($conn);
+            }))
+        ;
+
+        $qb = new ExpressionBuilder($conn);
+        $cte = $qb->createRecursiveExpression('category_tree');
+        $cte
+            ->withFields('id', 'name', 'parent_id')
+            ->withInitialSelect('select id, name, parent_id from category where id = 3')
+            ->query()
+            ->select('c.id', 'c.name', 'c.parent_id')
+            ->from('category', 'c')
+            ->innerJoin('c', 'category_tree', 'ct', 'ct.parent_id = c.id')
+        ;
+
+        $qb->select('*')->from('category_tree');
+
+        /* @link https://github.com/somnambulist-tech/cte-builder/issues/1 */
+        $expected =
+            'WITH RECURSIVE category_tree (id, name, parent_id) AS ' .
+            '(' .
+            'select id, name, parent_id from category where id = 3 '.
+            'UNION ALL' .
+            ' SELECT c.id, c.name, c.parent_id FROM category c INNER JOIN category_tree ct ON ct.parent_id = c.id)' .
+            ' SELECT * FROM category_tree'
+        ;
+
+        $this->assertEquals($expected, $qb->getSQL());
+    }
+
+    public function testCanBuildRecursiveCTEMoreComplexExample()
+    {
+        $conn = $this->createMock(Connection::class);
+        $conn
+            ->expects($this->any())
+            ->method('createQueryBuilder')
+            ->will($this->returnCallback(function () use ($conn) {
+                return new QueryBuilder($conn);
+            }))
+        ;
+
+        $qb = new ExpressionBuilder($conn);
+        $qb->createRecursiveExpression('xaxis')->withFields('x')->withInitialSelect('VALUES(-2.0)')->select('x+0.05')->from('xaxis')->where('x<1.2');
+        $qb->createRecursiveExpression('yaxis')->withFields('y')->withInitialSelect('VALUES(-1.0)')->select('y+0.1')->from('yaxis')->where('y<1.0');
+        $qb
+            ->createRecursiveExpression('m')
+            ->withFields('iter', 'cx', 'cy', 'x', 'y')
+            ->withInitialSelect('SELECT 0, x, y, 0.0, 0.0 FROM xaxis, yaxis')
+            ->select('iter+1', 'cx', 'cy', 'x*x-y*y + cx', '2.0*x*y + cy')
+            ->from('m')
+            ->where('(x*x + y*y) < 4.0 AND iter<28')
+            ->dependsOn('xaxis', 'yaxis')
+        ;
+        $qb->createExpression('m2')->select('max(iter) AS iter', 'cx', 'cy')->from('m')->groupBy('cx')->addGroupBy('cy')->dependsOn('m');
+        $qb->createExpression('a')->select('group_concat( substr(\' .+*#\', 1+min(iter/7,4), 1), \'\') as t')->from('m2')->groupBy('cy')->dependsOn('m2');
+
+        $qb->select('group_concat(rtrim(t),x\'0a\')')->from('a');
+
+        /**
+         * The (mangled) query below is the example Mandelbrot recursive query from the SQlite docs,
+         * slightly modified to use aliases on some of the later CTEs.
+         *
+         * @link https://sqlite.org/lang_with.html
+         */
+        $expected =
+            'WITH RECURSIVE ' .
+                'xaxis (x) AS (VALUES(-2.0) UNION ALL SELECT x+0.05 FROM xaxis WHERE x<1.2), ' .
+                'yaxis (y) AS (VALUES(-1.0) UNION ALL SELECT y+0.1 FROM yaxis WHERE y<1.0), ' .
+                'm (iter, cx, cy, x, y) AS (' .
+                    'SELECT 0, x, y, 0.0, 0.0 FROM xaxis, yaxis ' .
+                    'UNION ALL ' .
+                    'SELECT iter+1, cx, cy, x*x-y*y + cx, 2.0*x*y + cy FROM m ' .
+                    'WHERE (x*x + y*y) < 4.0 AND iter<28' .
+                '), ' .
+                'm2 AS (' .
+                    'SELECT max(iter) AS iter, cx, cy FROM m GROUP BY cx, cy' .
+                '), ' .
+                'a AS (' .
+                    'SELECT group_concat( substr(\' .+*#\', 1+min(iter/7,4), 1), \'\') as t ' .
+                    'FROM m2 GROUP BY cy' .
+                ') ' .
+            'SELECT group_concat(rtrim(t),x\'0a\') FROM a'
+        ;
+
+        $this->assertEquals($expected, $qb->getSQL());
+    }
+
+    public function testRecursiveExpressionHonourDependencies()
+    {
+        $conn = $this->createMock(Connection::class);
+        $conn
+            ->expects($this->any())
+            ->method('createQueryBuilder')
+            ->will($this->returnCallback(function () use ($conn) {
+                return new QueryBuilder($conn);
+            }))
+        ;
+
+        $qb = new ExpressionBuilder($conn);
+        $qb
+            ->createRecursiveExpression('m')
+            ->withFields('iter', 'cx', 'cy', 'x', 'y')
+            ->withInitialSelect('SELECT 0, x, y, 0.0, 0.0 FROM xaxis, yaxis')
+            ->select('iter+1', 'cx', 'cy', 'x*x-y*y + cx', '2.0*x*y + cy')
+            ->from('m')
+            ->where('(x*x + y*y) < 4.0 AND iter<28')
+            ->dependsOn('xaxis', 'yaxis')
+        ;
+        $qb->createExpression('m2')->select('max(iter) AS iter', 'cx', 'cy')->from('m')->groupBy('cx')->addGroupBy('cy')->dependsOn('m');
+        $qb->createRecursiveExpression('xaxis')->withFields('x')->withInitialSelect('VALUES(-2.0)')->select('x+0.05')->from('xaxis')->where('x<1.2');
+        $qb->createRecursiveExpression('yaxis')->withFields('y')->withInitialSelect('VALUES(-1.0)')->select('y+0.1')->from('yaxis')->where('y<1.0');
+        $qb->createExpression('a')->select('group_concat( substr(\' .+*#\', 1+min(iter/7,4), 1), \'\') as t')->from('m2')->groupBy('cy')->dependsOn('m2');
+
+        $qb->select('group_concat(rtrim(t),x\'0a\')')->from('a');
+
+        $expected =
+            'WITH RECURSIVE ' .
+                'xaxis (x) AS (VALUES(-2.0) UNION ALL SELECT x+0.05 FROM xaxis WHERE x<1.2), ' .
+                'yaxis (y) AS (VALUES(-1.0) UNION ALL SELECT y+0.1 FROM yaxis WHERE y<1.0), ' .
+                'm (iter, cx, cy, x, y) AS (' .
+                    'SELECT 0, x, y, 0.0, 0.0 FROM xaxis, yaxis ' .
+                    'UNION ALL ' .
+                    'SELECT iter+1, cx, cy, x*x-y*y + cx, 2.0*x*y + cy FROM m ' .
+                    'WHERE (x*x + y*y) < 4.0 AND iter<28' .
+                '), ' .
+                'm2 AS (' .
+                    'SELECT max(iter) AS iter, cx, cy FROM m GROUP BY cx, cy' .
+                '), ' .
+                'a AS (' .
+                    'SELECT group_concat( substr(\' .+*#\', 1+min(iter/7,4), 1), \'\') as t ' .
+                    'FROM m2 GROUP BY cy' .
+                ') ' .
+            'SELECT group_concat(rtrim(t),x\'0a\') FROM a'
+        ;
+
+        $this->assertEquals($expected, $qb->getSQL());
+    }
 }
