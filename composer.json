@@ -6,8 +6,8 @@
     "require": {
         "php": ">=8.0",
         "ext-json":  "*",
-        "beberlei/assert": "~3.2",
-        "doctrine/dbal": "~2.9",
+        "beberlei/assert": "~3.3",
+        "doctrine/dbal": "~3",
         "somnambulist/collection": "~5.0"
     },
     "require-dev": {
