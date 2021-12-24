@@ -3,7 +3,7 @@
 namespace Somnambulist\Components\CTEBuilder;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\Statement;
+use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder as DBALExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -78,7 +78,7 @@ class ExpressionBuilder
         return $this->getSQL();
     }
 
-    public function __get($name)
+    public function __get(string $name)
     {
         if ($this->has($name)) {
             return $this->get($name);

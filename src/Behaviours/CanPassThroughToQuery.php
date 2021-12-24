@@ -22,7 +22,10 @@ use function sprintf;
 trait CanPassThroughToQuery
 {
 
-    public function __call($name, $arguments)
+    /**
+     * @return ExpressionBuilder|static
+     */
+    public function __call(string $name, array $arguments)
     {
         $allowed = [
             'addGroupBy', 'addOrderBy', 'addSelect', 'andHaving', 'andWhere',
