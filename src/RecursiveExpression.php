@@ -14,12 +14,11 @@ use Doctrine\DBAL\Query\QueryBuilder;
  */
 class RecursiveExpression extends Expression
 {
-
     private string $initialSelect = '';
     private bool $uniqueRows = false;
 
     /**
-     * By default the recursive CTE will be made with UNION ALL, set to true for a UNION query
+     * By default, the recursive CTE will be made with UNION ALL, set to true for a UNION query
      *
      * @param bool $union
      *

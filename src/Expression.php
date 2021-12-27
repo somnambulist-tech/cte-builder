@@ -56,7 +56,6 @@ use function sprintf;
  */
 class Expression
 {
-
     use CanPassThroughToQuery;
 
     private QueryBuilder $query;
@@ -106,6 +105,9 @@ class Expression
         return new Collection($this->query->getParameters());
     }
 
+    /**
+     * @return string[]
+     */
     public function getDependencies(): array
     {
         return $this->dependencies;

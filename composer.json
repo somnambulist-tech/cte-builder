@@ -6,15 +6,15 @@
     "require": {
         "php": ">=8.0",
         "ext-json":  "*",
-        "beberlei/assert": "~3.2",
-        "doctrine/dbal": "~2.9",
-        "somnambulist/collection": "~5.0"
+        "beberlei/assert": "^3.2",
+        "doctrine/dbal": "^2.9|^3.0",
+        "somnambulist/collection": "^5.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "~9.5",
-        "somnambulist/domain": "~4.0",
-        "symfony/var-dumper": "^5.2",
-        "vimeo/psalm": "^3.18"
+        "phpunit/phpunit": "^9.5",
+        "somnambulist/domain": "^4.3",
+        "symfony/var-dumper": "^5.4",
+        "vimeo/psalm": "^4.16"
     },
     "autoload": {
         "psr-4": {

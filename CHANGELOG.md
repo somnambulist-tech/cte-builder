@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+2021-12-27
+----------
+
+ * Add support for `doctrine/dbal` 3.X
+ * Update type hints
+
 2021-05-25
 ----------
 

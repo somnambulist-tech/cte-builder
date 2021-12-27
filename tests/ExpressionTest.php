@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Somnambulist\Components\CTEBuilder\Tests;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\PDOSqlite\Driver;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PHPUnit\Framework\TestCase;
@@ -44,7 +44,7 @@ class ExpressionTest extends TestCase
 
     public function testMethodPassThrough()
     {
-        $conn = new Connection(['url' => 'sqlite:///memory'], new Driver());
+        $conn = DriverManager::getConnection(['url' => 'sqlite:///memory']);
 
         $cte = new Expression('alias', $q = new QueryBuilder($conn), ['this', 'that']);
         $cte
