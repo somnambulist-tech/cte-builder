@@ -213,7 +213,11 @@ class ExpressionBuilder
             ->each(fn ($value, $key) => $stmt->bindValue($key, $value, (is_int($value) ? ParameterType::INTEGER : ParameterType::STRING)))
         ;
 
-        return $stmt->executeQuery();
+        if (method_exists($stmt, 'executeQuery')) {
+            return $stmt->executeQuery();
+        }
+
+        return $stmt->execute();
     }
 
     public function getSQL(): string

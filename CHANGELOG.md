@@ -7,6 +7,7 @@ Change Log
  * BC Break: change return type on `ExpressionBuilder::execute` due to DBAL changes
  * Add Pagerfanta adapter for handling pagination of expression builder
  * Add `__clone` to prevent reference re-use in paginator on `ExpressionBuilder` and `Expression`
+ * Fix method calls to DBAL to call deprecated method on 2.X
 
 2021-12-27
 ----------
