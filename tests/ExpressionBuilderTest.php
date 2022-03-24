@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Somnambulist\Components\CTEBuilder\Tests;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Query\QueryBuilder;
 use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
@@ -496,5 +497,31 @@ class ExpressionBuilderTest extends TestCase
         ;
 
         $this->assertEquals($expected, $qb->getSQL());
+    }
+
+    public function testExecuteQuery()
+    {
+        $conn = DriverManager::getConnection(['url' => 'sqlite://memory']);
+
+        $qb = new ExpressionBuilder($conn);
+        $qb
+            ->createRecursiveExpression('m')
+            ->withFields('iter', 'cx', 'cy', 'x', 'y')
+            ->withInitialSelect('SELECT 0, x, y, 0.0, 0.0 FROM xaxis, yaxis')
+            ->select('iter+1', 'cx', 'cy', 'x*x-y*y + cx', '2.0*x*y + cy')
+            ->from('m')
+            ->where('(x*x + y*y) < 4.0 AND iter<28')
+            ->dependsOn('xaxis', 'yaxis')
+        ;
+        $qb->createExpression('m2')->select('max(iter) AS iter', 'cx', 'cy')->from('m')->groupBy('cx')->addGroupBy('cy')->dependsOn('m');
+        $qb->createRecursiveExpression('xaxis')->withFields('x')->withInitialSelect('VALUES(-2.0)')->select('x+0.05')->from('xaxis')->where('x<1.2');
+        $qb->createRecursiveExpression('yaxis')->withFields('y')->withInitialSelect('VALUES(-1.0)')->select('y+0.1')->from('yaxis')->where('y<1.0');
+        $qb->createExpression('a')->select('group_concat( substr(\' .+*#\', 1+min(iter/7,4), 1), \'\') as t')->from('m2')->groupBy('cy')->dependsOn('m2');
+
+        $qb->select('group_concat(rtrim(t),x\'0a\')')->from('a');
+
+        $ret = $qb->execute()->fetchAllAssociative();
+
+        $this->assertIsArray($ret);
     }
 }

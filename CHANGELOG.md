@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+2022-03-24
+----------
+
+ * BC Break: change return type on `ExpressionBuilder::execute` due to DBAL changes
+ * Add Pagerfanta adapter for handling pagination of expression builder
+ * Add `__clone` to prevent reference re-use in paginator on `ExpressionBuilder` and `Expression`
+
 2021-12-27
 ----------
 

@@ -75,6 +75,11 @@ class Expression
         return $this->getSQL();
     }
 
+    public function __clone()
+    {
+        $this->query = clone $this->query;
+    }
+
     public function query(): QueryBuilder
     {
         return $this->query;

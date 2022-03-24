@@ -31,6 +31,9 @@ Install using composer, or checkout / pull the files from github.com.
 
  * composer require somnambulist/cte-builder
 
+__Note:__ 3.2.0 changes the return type on the main execute method for compatibility with doctrine/dbal.
+This method now returns the `Doctrine\DBAL\Result` object and not a `Statement` object.
+
 ## Usage
 
 CTE Builder consists of the ExpressionBuilder and the Expression. Expressions are created
@@ -47,7 +50,7 @@ use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
 $eb = new ExpressionBuilder($connection);
 $expr = $eb->createExpression('first_clause');
 
-$stmt = $eb->select('field', 'another field')->from('table_or_cte')->execute();
+$result = $eb->select('field', 'another field')->from('table_or_cte')->execute();
 ```
 
 Each expression is its own independent query builder instance using the same connection.
@@ -139,6 +142,34 @@ fields that will be returned by calling: `withFields()` and then supplying a lis
 See the test cases for some examples of simple queries and then a more complex case adapted from the
 SQlite documentation.
 
+### Paginating
+
+An adapter is included for Pagerfanta to handle pagination of results. To use it:
+`composer req pagerfanta/pagerfanta`, and then create your CTE as normal. To add paginated results,
+consider this contrived example:
+
+```php
+$cte = new ExpressionBuilder($conn);
+// this is just as example, this is a poor use of CTEs
+$users = $cte->createExpression('only_users');
+$users->select('*')->from('users')->where('type = :type')->setParameter('type', 'user');
+
+$cte->select('*')->from('only_users');
+
+$paginator = new PagerfantaAdapter($cte, function (ExpressionBuilder $qb) {
+    $qb->select('COUNT(*) AS total_results');
+});
+$pf = new Pagerfanta($paginator);
+$pf->setMaxPerPage(1)->setCurrentPage(3);
+
+foreach ($pf as $result) {
+    dump($result);
+}
+```
+
+The paginator adapter will clone the `ExpressionBuilder` to apply whatever counting mechanic you need
+without affecting the main query.
+
 ## Profiling
 
 If you use Symfony; using the standard Doctrine DBAL connection from your entity manager will
@@ -153,7 +184,7 @@ For further insights consider using an application profiler such as:
  * [BlackFire](https://blackfire.io)
 
 For other frameworks; as DBAL is used, hook into the Configuration object and add an SQL
-logger instance that can report to your frameworks profiler.
+logger instance that can report to your frameworks' profiler.
 
 ## Test Suite
 

@@ -3,7 +3,7 @@
 namespace Somnambulist\Components\CTEBuilder;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Statement;
+use Doctrine\DBAL\Result;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder as DBALExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -28,34 +28,33 @@ use Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyExceptio
  * @package    Somnambulist\Components\CTEBuilder
  * @subpackage Somnambulist\Components\CTEBuilder\ExpressionBuilder
  *
- * @method Expression addGroupBy(string $groupBy)
- * @method Expression addOrderBy(string $sort, string $order = null)
- * @method Expression addSelect(string ...$select = null)
- * @method Expression andHaving($having)
- * @method Expression andWhere($where)
- * @method Expression createNamedParameter($value, int $type = ParameterType::STRING, string $placeHolder = null)
- * @method Expression createPositionalParameter($value, int $type = ParameterType::STRING)
- * @method Expression from(string $table, string $alias = null)
- * @method Expression groupBy($groupBy)
- * @method Expression having($having)
- * @method Expression innerJoin(string $fromAlias, string $join, string $alias, $conditions)
- * @method Expression join(string $fromAlias, string $join, string $alias, $conditions)
- * @method Expression leftJoin(string $fromAlias, string $join, string $alias, $conditions)
- * @method Expression orderBy(string $sort, string $order = null)
- * @method Expression orHaving($having)
- * @method Expression orWhere($where)
- * @method Expression rightJoin(string $fromAlias, string $join, string $alias, $conditions)
- * @method Expression select(string ...$field)
- * @method Expression setFirstResult(int $first)
- * @method Expression setMaxResults(int $max)
- * @method Expression setParameter(string|int $key, mixed $value, $type = null)
- * @method Expression setParameters(array $parameters)
- * @method Expression where($where)
+ * @method ExpressionBuilder addGroupBy(string $groupBy)
+ * @method ExpressionBuilder addOrderBy(string $sort, string $order = null)
+ * @method ExpressionBuilder addSelect(string ...$select = null)
+ * @method ExpressionBuilder andHaving($having)
+ * @method ExpressionBuilder andWhere($where)
+ * @method ExpressionBuilder createNamedParameter($value, int $type = ParameterType::STRING, string $placeHolder = null)
+ * @method ExpressionBuilder createPositionalParameter($value, int $type = ParameterType::STRING)
+ * @method ExpressionBuilder from(string $table, string $alias = null)
+ * @method ExpressionBuilder groupBy($groupBy)
+ * @method ExpressionBuilder having($having)
+ * @method ExpressionBuilder innerJoin(string $fromAlias, string $join, string $alias, $conditions)
+ * @method ExpressionBuilder join(string $fromAlias, string $join, string $alias, $conditions)
+ * @method ExpressionBuilder leftJoin(string $fromAlias, string $join, string $alias, $conditions)
+ * @method ExpressionBuilder orderBy(string $sort, string $order = null)
+ * @method ExpressionBuilder orHaving($having)
+ * @method ExpressionBuilder orWhere($where)
+ * @method ExpressionBuilder rightJoin(string $fromAlias, string $join, string $alias, $conditions)
+ * @method ExpressionBuilder select(string ...$field)
+ * @method ExpressionBuilder setFirstResult(int $first)
+ * @method ExpressionBuilder setMaxResults(int $max)
+ * @method ExpressionBuilder setParameter(string|int $key, mixed $value, $type = null)
+ * @method ExpressionBuilder setParameters(array $parameters)
+ * @method ExpressionBuilder where($where)
  * @method DBALExpressionBuilder expr()
  */
 class ExpressionBuilder
 {
-
     use CanPassThroughToQuery;
 
     private Connection $conn;
@@ -85,6 +84,11 @@ class ExpressionBuilder
         }
 
         throw new OutOfBoundsException(sprintf('CTE with alias "%s" has not been created', $name));
+    }
+
+    public function __clone()
+    {
+        $this->query = clone $this->query;
     }
 
     public function expressions(): Collection
@@ -198,7 +202,7 @@ class ExpressionBuilder
         $this->expressions->each(fn (Expression $cte) => $this->parameters->merge($cte->getParameters()));
     }
 
-    public function execute(): Statement
+    public function execute(): Result
     {
         $this->log();
 
@@ -209,9 +213,7 @@ class ExpressionBuilder
             ->each(fn ($value, $key) => $stmt->bindValue($key, $value, (is_int($value) ? ParameterType::INTEGER : ParameterType::STRING)))
         ;
 
-        $stmt->execute();
-
-        return $stmt;
+        return $stmt->executeQuery();
     }
 
     public function getSQL(): string
@@ -295,7 +297,7 @@ class ExpressionBuilder
             return;
         }
 
-        $this->logger->debug($q = $this->expandQueryWithParameterSubstitution($this->getSQL(), $this->getParameters()));
+        $this->logger->debug($this->expandQueryWithParameterSubstitution($this->getSQL(), $this->getParameters()));
     }
 
     /**
