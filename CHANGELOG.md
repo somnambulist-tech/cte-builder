@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+2022-03-30
+----------
+
+ * Fix deep cloning should clone the parameters and expressions
+
 2022-03-24
 ----------
 

@@ -3,10 +3,10 @@
 namespace Somnambulist\Components\CTEBuilder;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Result;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder as DBALExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Result;
 use OutOfBoundsException;
 use Psr\Log\LoggerInterface;
 use Somnambulist\Components\Collection\MutableCollection as Collection;
@@ -88,7 +88,9 @@ class ExpressionBuilder
 
     public function __clone()
     {
-        $this->query = clone $this->query;
+        $this->query       = clone $this->query;
+        $this->parameters  = clone $this->parameters;
+        $this->expressions = clone $this->expressions;
     }
 
     public function expressions(): Collection
@@ -199,7 +201,7 @@ class ExpressionBuilder
     {
         $this->parameters->merge($this->query->getParameters());
 
-        $this->expressions->each(fn (Expression $cte) => $this->parameters->merge($cte->getParameters()));
+        $this->expressions->each(fn(Expression $cte) => $this->parameters->merge($cte->getParameters()));
     }
 
     public function execute(): Result
@@ -210,7 +212,7 @@ class ExpressionBuilder
 
         $this
             ->getParameters()
-            ->each(fn ($value, $key) => $stmt->bindValue($key, $value, (is_int($value) ? ParameterType::INTEGER : ParameterType::STRING)))
+            ->each(fn($value, $key) => $stmt->bindValue($key, $value, (is_int($value) ? ParameterType::INTEGER : ParameterType::STRING)))
         ;
 
         if (method_exists($stmt, 'executeQuery')) {
@@ -227,14 +229,14 @@ class ExpressionBuilder
 
     private function isRecursive(): bool
     {
-        return $this->expressions->filter(fn (Expression $e) => $e instanceof RecursiveExpression)->count() > 0;
+        return $this->expressions->filter(fn(Expression $e) => $e instanceof RecursiveExpression)->count() > 0;
     }
 
     private function buildWith(): string
     {
         $with = $this
             ->buildDependencyTree($this->expressions)
-            ->map(fn (Expression $cte, string $key) => $cte->getInlineSQL())
+            ->map(fn(Expression $cte, string $key) => $cte->getInlineSQL())
             ->implode(', ')
         ;
 
@@ -251,7 +253,7 @@ class ExpressionBuilder
 
         while ($ctes->count() > $sortedExpressions->count()) {
             $resolvedDependenciesForCte = false;
-            $alias = $dep = 'undefined';
+            $alias                      = $dep = 'undefined';
 
             /**
              * @var string     $alias
