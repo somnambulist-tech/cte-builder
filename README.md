@@ -1,6 +1,6 @@
 # Common Table Expression Builder
 
-[![GitHub Actions Build Status](https://img.shields.io/github/workflow/status/somnambulist-tech/cte-builder/tests?logo=github)](https://github.com/somnambulist-tech/cte-builder/actions?query=workflow%3Atests)
+[![GitHub Actions Build Status](https://img.shields.io/github/actions/workflow/status/somnambulist-tech/cte-builder/tests.yml?logo=github&branch=master)](https://github.com/somnambulist-tech/cte-builder/actions?query=workflow%3Atests)
 [![Issues](https://img.shields.io/github/issues/somnambulist-tech/cte-builder?logo=github)](https://github.com/somnambulist-tech/cte-builder/issues)
 [![License](https://img.shields.io/github/license/somnambulist-tech/cte-builder?logo=github)](https://github.com/somnambulist-tech/cte-builder/blob/master/LICENSE)
 [![PHP Version](https://img.shields.io/packagist/php-v/somnambulist/cte-builder?logo=php&logoColor=white)](https://packagist.org/packages/somnambulist/cte-builder)
