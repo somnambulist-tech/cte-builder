@@ -14,6 +14,8 @@ use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionNotFoundException;
 use Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyException;
 use Somnambulist\Components\CTEBuilder\Expression;
 use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
+use Somnambulist\Components\CTEBuilder\UnionExpression;
+use Somnambulist\Components\CTEBuilder\WrappedCTE;
 use Somnambulist\Components\Domain\Entities\Types\DateTime\DateTime;
 use Somnambulist\Components\Domain\Utils\EntityAccessor;
 
@@ -523,5 +525,92 @@ class ExpressionBuilderTest extends TestCase
         $ret = $qb->execute()->fetchAllAssociative();
 
         $this->assertIsArray($ret);
+    }
+
+    public function testBuildCteWithUnionQuery()
+    {
+        $conn = DriverManager::getConnection(['url' => 'sqlite://memory']);
+
+        $qb = new ExpressionBuilder($conn);
+
+        $id = '50991b98-1769-4332-9a7f-e2150d6eea58';
+
+        // Created aside from the main ExpressionBuilder and not even registered to it.
+        $unionSubQb1 = new Expression('union_1', $qb->createQuery());
+        $unionSubQb1
+            ->addSelect('p.id')
+            ->addSelect('p.full_name as object_name')
+            ->addSelect('\'person\' as type')
+            ->from('people', 'p')
+            ->andWhere('p.id = :id1')
+            ->setParameter('id1', $id)
+        ;
+
+        // Created aside from the main ExpressionBuilder and not even registered to it.
+        $unionSubQb2 = new Expression('union_2', $qb->createQuery());
+        $unionSubQb2
+            ->addSelect('c.id')
+            ->addSelect('c.company_name as object_name')
+            ->addSelect('\'company\' as type')
+            ->from('companies', 'c')
+            ->andWhere('c.id = :id2')
+            ->setParameter('id2', $id)
+        ;
+
+        // Created aside from the main ExpressionBuilder and not even registered to it.
+        $unionSubQb3 = new Expression('union_3', $qb->createQuery());
+        $unionSubQb3
+            ->addSelect('p.id')
+            ->addSelect('p.planet_name as object_name')
+            ->addSelect('\'planet\' as type')
+            ->from('planets', 'p')
+            ->andWhere('p.id = :id3')
+            ->setParameter('id3', $id)
+        ;
+
+        $cteExpressionName1 = 'reported_objects';
+        $cteExpressionQb1 = new WrappedCTE(
+            new UnionExpression(
+                new UnionExpression($unionSubQb1, $unionSubQb2, 'union_between_sub1_and_sub2_does_not_matter_anyway', $qb->query(), []),
+                $unionSubQb3,
+                'union_between_sub1sub2_and_sub3_does_not_matter_either',
+                $qb->query(),
+                [],
+            ),
+            $cteExpressionName1,
+            $qb->query(),
+            [],
+        );
+
+        $qb->with($cteExpressionQb1);
+
+        $qb
+            ->addSelect('ro.id')
+            ->addSelect('ro.object_name')
+            ->addSelect('ro.type')
+            ->from('reported_objects', 'ro')
+            ->addOrderBy('ro.object_name', 'ASC');
+
+        $expected = <<<STRING
+        WITH reported_objects AS (SELECT p.id, p.full_name as object_name, 'person' as type FROM people p WHERE p.id = :id1 
+
+         UNION 
+
+         SELECT c.id, c.company_name as object_name, 'company' as type FROM companies c WHERE c.id = :id2 
+
+         UNION 
+
+         SELECT p.id, p.planet_name as object_name, 'planet' as type FROM planets p WHERE p.id = :id3) SELECT ro.id, ro.object_name, ro.type FROM reported_objects ro ORDER BY ro.object_name ASC
+        STRING;
+
+        $this->assertEquals($expected, $qb->getSQL());
+        $this->assertEquals(
+            [
+                'id1' => $id,
+                'id2' => $id,
+                'id3' => $id,
+            ],
+            $qb->getParameters()->toArray(),
+        );
     }
 }
