@@ -5,12 +5,8 @@ namespace Somnambulist\Components\CTEBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 
 /**
- * Class RecursiveExpression
- *
- * Allows defining a recursive common table expression.
- *
- * @package    Somnambulist\Components\CTEBuilder
- * @subpackage Somnambulist\Components\CTEBuilder\RecursiveExpression
+ * Represents a recursive common table expression where an initial state is reduced by
+ * the results of the main query.
  */
 class RecursiveExpression extends Expression
 {

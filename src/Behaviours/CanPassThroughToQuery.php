@@ -10,12 +10,7 @@ use function in_array;
 use function sprintf;
 
 /**
- * Trait CanPassThroughToQuery
- *
  * Allow passing through certain methods to an underlying QueryBuilder instance.
- *
- * @package    Somnambulist\Components\CTEBuilder\Behaviours
- * @subpackage Somnambulist\Components\CTEBuilder\Behaviours\CanPassThroughToQuery
  *
  * @property QueryBuilder $query
  */

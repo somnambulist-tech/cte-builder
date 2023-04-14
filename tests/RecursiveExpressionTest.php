@@ -7,12 +7,6 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 use Somnambulist\Components\CTEBuilder\RecursiveExpression;
 
-/**
- * Class RecursiveExpressionTest
- *
- * @package    Somnambulist\Components\CTEBuilder\Tests
- * @subpackage Somnambulist\Components\CTEBuilder\Tests\RecursiveExpressionTest
- */
 class RecursiveExpressionTest extends TestCase
 {
 

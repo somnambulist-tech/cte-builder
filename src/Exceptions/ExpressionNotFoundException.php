@@ -5,12 +5,6 @@ namespace Somnambulist\Components\CTEBuilder\Exceptions;
 use Assert\Assertion;
 use Assert\InvalidArgumentException;
 
-/**
- * Class ExpressionNotFoundException
- *
- * @package    Somnambulist\Components\CTEBuilder\Exceptions
- * @subpackage Somnambulist\Components\CTEBuilder\Exceptions\ExpressionNotFoundException
- */
 class ExpressionNotFoundException extends InvalidArgumentException
 {
 

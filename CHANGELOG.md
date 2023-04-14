@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+2022-04-14
+----------
+
+ * Add basic UNION/UNION ALL support to `Expression` object
+ * Remove unnecessary docblocks
+ * Update workflow config
+
 2022-03-30
 ----------
 

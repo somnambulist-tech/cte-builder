@@ -5,12 +5,6 @@ namespace Somnambulist\Components\CTEBuilder\Exceptions;
 use Assert\Assertion;
 use Assert\InvalidArgumentException;
 
-/**
- * Class ExpressionAlreadyExistsException
- *
- * @package    Somnambulist\Components\CTEBuilder\Exceptions
- * @subpackage Somnambulist\Components\CTEBuilder\Exceptions\ExpressionAlreadyExistsException
- */
 class ExpressionAlreadyExistsException extends InvalidArgumentException
 {
 

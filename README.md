@@ -112,6 +112,48 @@ $eb->createExpression('third_clause');
 $eb->third_clause->select();
 ```
 
+### UNION Queries in CTE expressions
+
+From v3.3 there is very basic support for UNION / UNION ALL when using Expression objects. This allows more
+easily creating UNIONs on the CTE expressions.
+
+__Note:__ this is very limited and does not support wrapped statements / ORDER BY on the expressions used
+in UNIONs. Attempts to add ORDER BY to an expression passed to `union()`, `unionAll()`, or `addUnion()`
+will result in an exception being thrown at query compile time.
+
+To build a union query for a CTE expression, first create the holder expression via `createExpression()`
+and then call `union()` or `unionAll()` with the expressions to join together. Multiple expressions can
+be passed as separate arguments, or a single expression can be added via `addUnion()`. Note that both
+`union()` and `unionAll()` will reset the store of union expressions.
+
+For example:
+
+```php
+<?php
+use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
+
+$eb = new ExpressionBuilder($connection);
+$expr = $eb->createExpression('unioned_data');
+$expr->select('field1', 'field2')->from('some_table');
+
+$otherData = $eb->createDetachedExpression();
+$otherData->select('id AS field1', 'name AS field2')->from('some_other_table');
+$otherData2 = $eb->createDetachedExpression();
+$otherData2->select('id AS field1', 'name AS field2')->from('some_other_table');
+
+$expr->union($otherData, $otherData2);
+//$expr->unionAll($otherData, $otherData2);
+```
+
+Or add the unions using `addUnion()`:
+
+```php
+$expr->addUnion($otherData)->addUnion($otherData2);
+```
+
+__Note:__ you should not use the union methods with recursive CTEs. This will cause unpredictable
+behaviour and/or execution errors.
+
 ### Recursive CTEs
 
 To create a recursive CTE, first create the builder as before and then use `createRecursiveExpression`.

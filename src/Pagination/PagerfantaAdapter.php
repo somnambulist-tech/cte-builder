@@ -5,12 +5,6 @@ namespace Somnambulist\Components\CTEBuilder\Pagination;
 use Pagerfanta\Adapter\AdapterInterface;
 use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
 
-/**
- * Class PagerfantaAdapter
- *
- * @package    Somnambulist\Components\CTEBuilder\Pagination
- * @subpackage Somnambulist\Components\CTEBuilder\Pagination\PagerfantaAdapter
- */
 class PagerfantaAdapter implements AdapterInterface
 {
     /**
