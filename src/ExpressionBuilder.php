@@ -13,20 +13,16 @@ use Somnambulist\Components\Collection\MutableCollection as Collection;
 use Somnambulist\Components\CTEBuilder\Behaviours\CanPassThroughToQuery;
 use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionAlreadyExistsException;
 use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionNotFoundException;
+use Somnambulist\Components\CTEBuilder\Exceptions\MissingExpressionAliasException;
 use Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyException;
 
 /**
- * Class ExpressionBuilder
- *
  * Aggregates and executes the Expressions as an SQL query. Requires that a query that
  * uses the CTEs be set.
  *
  * ExpressionBuilder (not to be confused with DBAL\Query\Expression\ExpressionBuilder) allows
  * method pass-through to the underlying primary query builder and any bound CTE can be
  * accessed using property accessors.
- *
- * @package    Somnambulist\Components\CTEBuilder
- * @subpackage Somnambulist\Components\CTEBuilder\ExpressionBuilder
  *
  * @method ExpressionBuilder addGroupBy(string $groupBy)
  * @method ExpressionBuilder addOrderBy(string $sort, string $order = null)
@@ -116,6 +112,16 @@ class ExpressionBuilder
     }
 
     /**
+     * Creates a new Expression that is not bound to the current builder instance
+     *
+     * @return Expression
+     */
+    public function createDetachedExpression(): Expression
+    {
+        return new Expression('', $this->createQuery());
+    }
+
+    /**
      * Create a new CTE Expression with optional required dependencies
      *
      * These dependencies are permanent and cannot be removed from the expression.
@@ -157,6 +163,10 @@ class ExpressionBuilder
 
     public function with(Expression $cte): self
     {
+        if (!$cte->getAlias()) {
+            throw MissingExpressionAliasException::new();
+        }
+
         $this->expressions->set($cte->getAlias(), $cte);
 
         return $this;

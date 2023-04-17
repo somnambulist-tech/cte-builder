@@ -4,12 +4,6 @@ namespace Somnambulist\Components\CTEBuilder\Exceptions;
 
 use RuntimeException;
 
-/**
- * Class UnresolvableDependencyException
- *
- * @package    Somnambulist\Components\CTEBuilder\Exceptions
- * @subpackage Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyException
- */
 class UnresolvableDependencyException extends RuntimeException
 {
 

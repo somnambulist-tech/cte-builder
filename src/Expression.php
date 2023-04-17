@@ -7,13 +7,14 @@ use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Somnambulist\Components\Collection\MutableCollection as Collection;
 use Somnambulist\Components\CTEBuilder\Behaviours\CanPassThroughToQuery;
+use Somnambulist\Components\CTEBuilder\Exceptions\CannotCreateUnionWithOrderByException;
 use function array_merge;
+use function array_walk;
+use function count;
 use function implode;
 use function sprintf;
 
 /**
- * Class Expression
- *
  * Encapsulates a query builder that will be used as a Common Table Expression (CTE).
  * A CTE must have an alias and can have optional dependencies on other CTEs. When
  * built the dependencies will be resolved and ordered appropriately.
@@ -25,9 +26,6 @@ use function sprintf;
  * CTEs can have parameters bound to them independently of each other; however all
  * parameters must be bound using named place-holders and not positional place-holders.
  * All parameters will be collected into a single parameters Collection at build time.
- *
- * @package    Somnambulist\Components\CTEBuilder
- * @subpackage Somnambulist\Components\CTEBuilder\Expression
  *
  * @method Expression addGroupBy(string $groupBy)
  * @method Expression addOrderBy(string $sort, string $order = null)
@@ -62,6 +60,7 @@ class Expression
     private string $alias;
     private array $dependencies;
     private array $fields = [];
+    private array $unions = [];
 
     public function __construct(string $alias, QueryBuilder $query, array $dependencies = [])
     {
@@ -92,7 +91,19 @@ class Expression
 
     public function getSQL(): string
     {
-        return $this->query->getSQL();
+        $sql = $this->query->getSQL();
+
+        if (count($this->unions) > 0) {
+            if (count($this->query->getQueryPart('orderBy')) > 0) {
+                throw CannotCreateUnionWithOrderByException::new();
+            }
+
+            foreach ($this->unions as $expr) {
+                $sql .= sprintf(' UNION %s%s', $expr['all'] ? 'ALL ' : '', $expr['expr']->getSQL());
+            }
+        }
+
+        return $sql;
     }
 
     public function getInlineSQL(): string
@@ -123,6 +134,15 @@ class Expression
         return $this->fields;
     }
 
+    public function getQueryPart(string $name): mixed
+    {
+        if ($name === 'union') {
+            return $this->unions;
+        }
+
+        return $this->query->getQueryPart($name);
+    }
+
     public function mergeParameters(array $parameters): void
     {
         $this->setParameters(array_merge($this->query->getParameters(), $parameters));
@@ -145,6 +165,54 @@ class Expression
     public function withFields(string ...$fields): self
     {
         $this->fields = $fields;
+
+        return $this;
+    }
+
+    /**
+     * Create UNION of all passed expressions, resets the current set of unions
+     *
+     * @param Expression ...$expr
+     *
+     * @return $this
+     */
+    public function union(Expression ...$expr): self
+    {
+        $this->unions = [];
+
+        array_walk($expr, fn ($ex) => $this->addUnion($ex));
+
+        return $this;
+    }
+
+    /**
+     * Add an expression to be union'd to this query, if `$all` is true, use UNION ALL
+     *
+     * @param Expression $expr
+     * @param bool $all
+     *
+     * @return $this
+     */
+    public function addUnion(Expression $expr, bool $all = false): self
+    {
+        $this->mergeParameters($expr->getParameters()->all());
+        $this->unions[] = ['expr' => $expr, 'all' => $all];
+
+        return $this;
+    }
+
+    /**
+     * Create UNION ALL for all passed expressions, resets the current set of unions
+     *
+     * @param Expression ...$expr
+     *
+     * @return $this
+     */
+    public function unionAll(Expression ...$expr): self
+    {
+        $this->unions = [];
+
+        array_walk($expr, fn ($ex) => $this->addUnion($ex, true));
 
         return $this;
     }

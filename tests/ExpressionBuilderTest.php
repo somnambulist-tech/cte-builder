@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Somnambulist\Components\CTEBuilder\Tests;
 
@@ -17,15 +15,8 @@ use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
 use Somnambulist\Components\Domain\Entities\Types\DateTime\DateTime;
 use Somnambulist\Components\Domain\Utils\EntityAccessor;
 
-/**
- * Class ExpressionBuilderTest
- *
- * @package    Somnambulist\Components\CTEBuilder\Tests
- * @subpackage Somnambulist\Components\CTEBuilder\Tests\ExpressionBuilderTest
- */
 class ExpressionBuilderTest extends TestCase
 {
-
     public function testBuildCTEQuery()
     {
         $conn = $this->createMock(Connection::class);
@@ -57,7 +48,7 @@ class ExpressionBuilderTest extends TestCase
             ->innerJoin('p', 'prices', 'pr', 'pr.product_id = p.id')
         ;
 
-        $prices    = $qb->createExpression('prices');
+        $prices = $qb->createExpression('prices');
         $prices
             ->select('p.id', 'pr.price', 'pr.currency')
             ->from('prices', 'pr')
@@ -74,8 +65,7 @@ class ExpressionBuilderTest extends TestCase
             'WHERE p.updated_at BETWEEN :start_date AND :end_date), prices AS (SELECT p.id, ' .
             'pr.price, pr.currency FROM prices pr INNER JOIN available p ON pr.product_id = p.id), ' .
             'relevancy AS (SELECT p.* FROM available p INNER JOIN prices pr ON ' .
-            'pr.product_id = p.id) SELECT * FROM relevancy r'
-        ;
+            'pr.product_id = p.id) SELECT * FROM relevancy r';
 
         $this->assertEquals($expected, $sql);
     }
@@ -148,7 +138,7 @@ class ExpressionBuilderTest extends TestCase
             ->innerJoin('p', 'prices', 'pr', 'pr.product_id = p.id')
         ;
 
-        $prices    = $qb->createExpression('prices');
+        $prices = $qb->createExpression('prices');
         $prices
             ->select('p.id', 'pr.price', 'pr.currency')
             ->from('prices', 'pr')
@@ -163,8 +153,7 @@ class ExpressionBuilderTest extends TestCase
             'WHERE p.updated_at BETWEEN :start_date AND :end_date), prices AS (SELECT p.id, ' .
             'pr.price, pr.currency FROM prices pr INNER JOIN available p ON pr.product_id = p.id), ' .
             'relevancy AS (SELECT p.* FROM available p INNER JOIN prices pr ON ' .
-            'pr.product_id = p.id) SELECT * FROM relevancy r'
-        ;
+            'pr.product_id = p.id) SELECT * FROM relevancy r';
 
         $this->assertEquals($expected, (string)$qb);
     }
@@ -212,8 +201,8 @@ class ExpressionBuilderTest extends TestCase
         $qb->createExpression('available');
 
         $relevancy = $qb->createExpression('relevancy');
-        $prices    = $qb->createExpression('prices');
-        $sizes     = $qb->createExpression('sizes');
+        $prices = $qb->createExpression('prices');
+        $sizes = $qb->createExpression('sizes');
 
         $relevancy->dependsOn('available', 'prices', 'sizes');
         $prices->dependsOn('available');
@@ -223,7 +212,9 @@ class ExpressionBuilderTest extends TestCase
 
         $expected = ['available', 'prices', 'sizes', 'relevancy'];
 
-        $this->assertEquals($expected, $ordered->map(function (Expression $cte) { return $cte->getAlias(); })->toArray());
+        $this->assertEquals($expected, $ordered->map(function (Expression $cte) {
+            return $cte->getAlias();
+        })->toArray());
     }
 
     public function testOrderByDependenciesRaisesExceptionForUnmappedDependency()
@@ -241,8 +232,8 @@ class ExpressionBuilderTest extends TestCase
         $qb->createExpression('available');
 
         $relevancy = $qb->createExpression('relevancy');
-        $prices    = $qb->createExpression('prices');
-        $sizes     = $qb->createExpression('sizes');
+        $prices = $qb->createExpression('prices');
+        $sizes = $qb->createExpression('sizes');
 
         $relevancy->dependsOn('available', 'prices', 'sizes');
         $prices->dependsOn('available');
@@ -293,7 +284,7 @@ class ExpressionBuilderTest extends TestCase
         $available = $qb->createExpression('available');
         $available->setParameters([
             ':start_date' => DateTime::now()->toDateTimeString(),
-            ':end_date' => DateTime::now()->toDateTimeString(),
+            ':end_date'   => DateTime::now()->toDateTimeString(),
         ]);
 
         $relevancy = $qb->createExpression('relevancy');
@@ -305,7 +296,7 @@ class ExpressionBuilderTest extends TestCase
 
         $qb->createExpression('foobars');
 
-        $sizes     = $qb->createExpression('bazbars');
+        $sizes = $qb->createExpression('bazbars');
         $sizes
             ->setParameters([
                 ':foo' => 'bar',
@@ -369,7 +360,7 @@ class ExpressionBuilderTest extends TestCase
         $cte = $qb->createRecursiveExpression('category_tree');
         $cte
             ->withFields('id', 'name', 'parent_id')
-            ->withInitialSelect('select id, name, parent_id from category where id = 3')
+            ->withInitialSelect('SELECT id, name, parent_id FROM category WHERE id = 3')
             ->query()
             ->select('c.id', 'c.name', 'c.parent_id')
             ->from('category', 'c')
@@ -382,11 +373,11 @@ class ExpressionBuilderTest extends TestCase
         $expected =
             'WITH RECURSIVE category_tree (id, name, parent_id) AS ' .
             '(' .
-            'select id, name, parent_id from category where id = 3 '.
+            'SELECT id, name, parent_id FROM category WHERE id = 3 ' .
             'UNION ALL' .
-            ' SELECT c.id, c.name, c.parent_id FROM category c INNER JOIN category_tree ct ON ct.parent_id = c.id)' .
-            ' SELECT * FROM category_tree'
-        ;
+            ' SELECT c.id, c.name, c.parent_id FROM category c INNER JOIN category_tree ct ON ct.parent_id = c.id' .
+            ')' .
+            ' SELECT * FROM category_tree';
 
         $this->assertEquals($expected, $qb->getSQL());
     }
@@ -523,5 +514,78 @@ class ExpressionBuilderTest extends TestCase
         $ret = $qb->execute()->fetchAllAssociative();
 
         $this->assertIsArray($ret);
+    }
+
+    public function testBuildCteWithUnionQuery()
+    {
+        $conn = DriverManager::getConnection(['url' => 'sqlite://memory']);
+
+        $qb = new ExpressionBuilder($conn);
+
+        $id = '50991b98-1769-4332-9a7f-e2150d6eea58';
+
+        // Created aside from the main ExpressionBuilder and not even registered to it.
+        $unionSubQb1 = $qb->createExpression('reported_objects');
+        $unionSubQb1
+            ->addSelect('p.id')
+            ->addSelect('p.full_name as object_name')
+            ->addSelect('\'person\' as type')
+            ->from('people', 'p')
+            ->andWhere('p.id = :id1')
+            ->setParameter('id1', $id)
+        ;
+
+        // Created aside from the main ExpressionBuilder and not even registered to it.
+        $unionSubQb2 = $qb->createDetachedExpression();
+        $unionSubQb2
+            ->addSelect('c.id')
+            ->addSelect('c.company_name as object_name')
+            ->addSelect('\'company\' as type')
+            ->from('companies', 'c')
+            ->andWhere('c.id = :id2')
+            ->setParameter('id2', $id)
+        ;
+
+        // Created aside from the main ExpressionBuilder and not even registered to it.
+        $unionSubQb3 = $qb->createDetachedExpression();
+        $unionSubQb3
+            ->addSelect('p.id')
+            ->addSelect('p.planet_name as object_name')
+            ->addSelect('\'planet\' as type')
+            ->from('planets', 'p')
+            ->andWhere('p.id = :id3')
+            ->setParameter('id3', $id)
+        ;
+
+        $unionSubQb1->union($unionSubQb2, $unionSubQb3);
+
+        $qb
+            ->addSelect('ro.id')
+            ->addSelect('ro.object_name')
+            ->addSelect('ro.type')
+            ->from('reported_objects', 'ro')
+            ->addOrderBy('ro.object_name', 'ASC')
+        ;
+
+        $expected =
+            'WITH reported_objects AS (' .
+                'SELECT p.id, p.full_name as object_name, \'person\' as type FROM people p WHERE p.id = :id1 ' .
+                'UNION ' .
+                'SELECT c.id, c.company_name as object_name, \'company\' as type FROM companies c WHERE c.id = :id2 ' .
+                'UNION ' .
+                'SELECT p.id, p.planet_name as object_name, \'planet\' as type FROM planets p WHERE p.id = :id3' .
+            ') ' .
+            'SELECT ro.id, ro.object_name, ro.type FROM reported_objects ro ORDER BY ro.object_name ASC'
+        ;
+
+        $this->assertEquals($expected, $qb->getSQL());
+        $this->assertEquals(
+            [
+                'id1' => $id,
+                'id2' => $id,
+                'id3' => $id,
+            ],
+            $qb->getParameters()->toArray(),
+        );
     }
 }

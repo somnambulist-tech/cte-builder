@@ -8,12 +8,6 @@ use PHPUnit\Framework\TestCase;
 use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
 use Somnambulist\Components\CTEBuilder\Pagination\PagerfantaAdapter;
 
-/**
- * Class PagerfantaAdapterTest
- *
- * @package    Somnambulist\Components\CTEBuilder\Tests\Pagination
- * @subpackage Somnambulist\Components\CTEBuilder\Tests\Pagination\PagerfantaAdapterTest
- */
 class PagerfantaAdapterTest extends TestCase
 {
     public function testPaginator()
