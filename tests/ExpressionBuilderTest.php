@@ -5,6 +5,7 @@ namespace Somnambulist\Components\CTEBuilder\Tests;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Tools\DsnParser;
 use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
 use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionAlreadyExistsException;
@@ -12,21 +13,14 @@ use Somnambulist\Components\CTEBuilder\Exceptions\ExpressionNotFoundException;
 use Somnambulist\Components\CTEBuilder\Exceptions\UnresolvableDependencyException;
 use Somnambulist\Components\CTEBuilder\Expression;
 use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
-use Somnambulist\Components\Domain\Entities\Types\DateTime\DateTime;
-use Somnambulist\Components\Domain\Utils\EntityAccessor;
+use Somnambulist\Components\Models\Types\DateTime\DateTime;
+use Somnambulist\Components\Utils\EntityAccessor;
 
 class ExpressionBuilderTest extends TestCase
 {
     public function testBuildCTEQuery()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb
@@ -72,14 +66,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testFetchingUninitialisedCTERaisesException()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
 
@@ -90,14 +77,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testCreatingDuplicateAliasRaisesException()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb->createExpression('products');
@@ -109,14 +89,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testCanCastToString()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb
@@ -160,14 +133,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testClear()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb
@@ -181,21 +147,13 @@ class ExpressionBuilderTest extends TestCase
 
         $qb->clear();
 
-        $expected = 'SELECT';
-
-        $this->assertEquals($expected, $qb->getSQL());
+        $this->assertCount(0, $qb->expressions());
+        $this->assertCount(0, $qb->getParameters());
     }
 
     public function testOrderByDependencies()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb->createExpression('available');
@@ -219,14 +177,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testOrderByDependenciesRaisesExceptionForUnmappedDependency()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb->createExpression('available');
@@ -247,14 +198,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testOrderByDependenciesRaisesExceptionForCyclicalDependencies()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $available = $qb->createExpression('available');
@@ -271,14 +215,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testCanMergeParametersIntoSingleParametersCollection()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $available = $qb->createExpression('available');
@@ -308,14 +245,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testCanAccessBoundCTEsByPropertyAccessor()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $cte1 = $qb->createExpression('table');
@@ -329,14 +259,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testUnboundCTEAccessedByPropertyRaisesException()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
 
@@ -347,14 +270,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testCanBuildRecursiveCTEs()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $cte = $qb->createRecursiveExpression('category_tree');
@@ -384,14 +300,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testCanBuildRecursiveCTEMoreComplexExample()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb->createRecursiveExpression('xaxis')->withFields('x')->withInitialSelect('VALUES(-2.0)')->select('x+0.05')->from('xaxis')->where('x<1.2');
@@ -441,14 +350,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testRecursiveExpressionHonourDependencies()
     {
-        $conn = $this->createMock(Connection::class);
-        $conn
-            ->expects($this->any())
-            ->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($conn) {
-                return new QueryBuilder($conn);
-            }))
-        ;
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb
@@ -492,7 +394,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testExecuteQuery()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite://memory']);
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
         $qb
@@ -518,7 +420,7 @@ class ExpressionBuilderTest extends TestCase
 
     public function testBuildCteWithUnionQuery()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite://memory']);
+        $conn = $this->getConnection();
 
         $qb = new ExpressionBuilder($conn);
 
@@ -587,5 +489,10 @@ class ExpressionBuilderTest extends TestCase
             ],
             $qb->getParameters()->toArray(),
         );
+    }
+
+    private function getConnection(): Connection
+    {
+        return DriverManager::getConnection((new DsnParser)->parse('sqlite3:///:memory:'));
     }
 }

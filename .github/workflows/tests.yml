@@ -1,27 +1,38 @@
 name: tests
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-  create:
-    tags:
-      - '*'
-
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+    workflow_dispatch:
+    create:
+        tags:
+            - '*'
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    testsuite:
+        name: Unittests
+        runs-on: ubuntu-22.04
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version: ['8.1', '8.2', '8.3']
 
-    steps:
-    - uses: actions/checkout@v2
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 1
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php-version }}
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest
+            - name: Validate composer.json
+              run: composer validate
 
-    - name: Run test suite
-      run: vendor/bin/phpunit
+            - name: Composer install
+              run: composer install --prefer-dist --no-progress
+
+            - name: Run PHPUnit
+              run: vendor/bin/phpunit

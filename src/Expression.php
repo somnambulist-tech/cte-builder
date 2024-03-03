@@ -13,6 +13,7 @@ use function array_walk;
 use function count;
 use function implode;
 use function sprintf;
+use function str_contains;
 
 /**
  * Encapsulates a query builder that will be used as a Common Table Expression (CTE).
@@ -94,7 +95,7 @@ class Expression
         $sql = $this->query->getSQL();
 
         if (count($this->unions) > 0) {
-            if (count($this->query->getQueryPart('orderBy')) > 0) {
+            if (str_contains($sql, 'ORDER BY')) {
                 throw CannotCreateUnionWithOrderByException::new();
             }
 
@@ -132,15 +133,6 @@ class Expression
     public function getFields(): array
     {
         return $this->fields;
-    }
-
-    public function getQueryPart(string $name): mixed
-    {
-        if ($name === 'union') {
-            return $this->unions;
-        }
-
-        return $this->query->getQueryPart($name);
     }
 
     public function mergeParameters(array $parameters): void

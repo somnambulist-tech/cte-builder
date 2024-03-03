@@ -2,7 +2,9 @@
 
 namespace Somnambulist\Components\CTEBuilder\Tests\Pagination;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Tools\DsnParser;
 use Pagerfanta\Pagerfanta;
 use PHPUnit\Framework\TestCase;
 use Somnambulist\Components\CTEBuilder\ExpressionBuilder;
@@ -12,7 +14,7 @@ class PagerfantaAdapterTest extends TestCase
 {
     public function testPaginator()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite://memory']);
+        $conn = $this->getConnection();
 
         $conn->executeStatement(<<<SQL
             CREATE TABLE users (
@@ -48,5 +50,10 @@ class PagerfantaAdapterTest extends TestCase
 
         $this->assertCount(1, $pf->getCurrentPageResults());
         $this->assertEquals(5, $pf->count());
+    }
+
+    private function getConnection(): Connection
+    {
+        return DriverManager::getConnection((new DsnParser)->parse('sqlite3:///:memory:'));
     }
 }

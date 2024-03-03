@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Tools\DsnParser;
 use PHPUnit\Framework\TestCase;
 use Somnambulist\Components\Collection\MutableCollection as Collection;
 use Somnambulist\Components\CTEBuilder\Exceptions\CannotCreateUnionWithOrderByException;
@@ -37,7 +38,7 @@ class ExpressionTest extends TestCase
 
     public function testMethodPassThrough()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite:///memory']);
+        $conn = $this->getConnection();
 
         $cte = new Expression('alias', $q = new QueryBuilder($conn), ['this', 'that']);
         $cte
@@ -52,7 +53,7 @@ class ExpressionTest extends TestCase
 
     public function testUnion()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite:///memory']);
+        $conn = $this->getConnection();
 
         $cte = new Expression('alias', new QueryBuilder($conn), ['this', 'that']);
         $cte
@@ -69,7 +70,7 @@ class ExpressionTest extends TestCase
 
     public function testUnionAll()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite:///memory']);
+        $conn = $this->getConnection();
 
         $cte = new Expression('alias', new QueryBuilder($conn), ['this', 'that']);
         $cte
@@ -86,7 +87,7 @@ class ExpressionTest extends TestCase
 
     public function testUnionWithOrderByFails()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite:///memory']);
+        $conn = $this->getConnection();
 
         $cte = new Expression('alias', new QueryBuilder($conn), ['this', 'that']);
         $cte
@@ -105,7 +106,7 @@ class ExpressionTest extends TestCase
 
     public function testMixedUnions()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite:///memory']);
+        $conn = $this->getConnection();
 
         $cte = new Expression('alias', new QueryBuilder($conn), ['this', 'that']);
         $cte
@@ -123,7 +124,7 @@ class ExpressionTest extends TestCase
 
     public function testCallsToUnionResetsSet()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite:///memory']);
+        $conn = $this->getConnection();
 
         $cte = new Expression('alias', new QueryBuilder($conn), ['this', 'that']);
         $cte
@@ -136,13 +137,12 @@ class ExpressionTest extends TestCase
 
         $cte->unionAll($expr)->union($expr2);
 
-        $this->assertCount(1, $cte->getQueryPart('union'));
         $this->assertEquals('SELECT field, field2 FROM table UNION SELECT a, b, c FROM table2', $cte->getSQL());
     }
 
     public function testCallsToUnionAllResetsSet()
     {
-        $conn = DriverManager::getConnection(['url' => 'sqlite:///memory']);
+        $conn = $this->getConnection();
 
         $cte = new Expression('alias', new QueryBuilder($conn), ['this', 'that']);
         $cte
@@ -155,7 +155,11 @@ class ExpressionTest extends TestCase
 
         $cte->union($expr2)->unionAll($expr);
 
-        $this->assertCount(1, $cte->getQueryPart('union'));
         $this->assertEquals('SELECT field, field2 FROM table UNION ALL SELECT a, b, c FROM table2', $cte->getSQL());
+    }
+
+    private function getConnection(): Connection
+    {
+        return DriverManager::getConnection((new DsnParser)->parse('sqlite3:///:memory:'));
     }
 }

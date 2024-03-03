@@ -1,7 +1,15 @@
 Change Log
 ==========
 
-2022-04-14
+2024-03-02
+----------
+
+ * Update dependencies
+ * Support DBAL 4
+ * Drop support for DBAL <3
+ * Remove `Expression::getQueryParts()` as it no longer exists in DBAL 4
+
+2023-04-17
 ----------
 
  * Add basic UNION/UNION ALL support to `Expression` object
